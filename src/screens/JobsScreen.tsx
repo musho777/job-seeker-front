@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {Job} from '../types/Job';
-import {jobsApi} from '../services/api';
-import {JobCard} from '../components/JobCard';
-import {colors, spacing, borderRadius, typography} from '../theme/colors';
+import { Job } from '../types/Job';
+import { jobsApi } from '../services/api';
+import { JobCard } from '../components/JobCard';
+import { colors, spacing, borderRadius, typography } from '../theme/colors';
 
 export const JobsScreen: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -56,28 +56,46 @@ export const JobsScreen: React.FC = () => {
     }
   }, [fetchJobs]);
 
-  const handleToggleApplying = useCallback(
-    async (job: Job) => {
-      try {
+  const handleToggleApplying = useCallback(async (job: Job) => {
+    try {
+      if (!job.isApplying) {
+        // Apply to the job
+        console.log(job.sourceId);
+        const jobAnnouncementId =
+          job.jobAnnouncementId || parseInt(job.sourceId) || job.id;
+        const companyId = job.companyId || 0;
+
+        await jobsApi.applyToJob(jobAnnouncementId, companyId, job.title);
+
+        // Update local state to mark as applying
         const updatedJob = await jobsApi.updateJob(job.id, {
-          isApplying: !job.isApplying,
+          isApplying: true,
         });
         setJobs(prevJobs =>
           prevJobs.map(j => (j.id === job.id ? updatedJob : j)),
         );
-      } catch (error) {
-        console.error('Failed to update job:', error);
-        Alert.alert('Error', 'Failed to update job status. Please try again.');
+
+        Alert.alert('Success', 'Application submitted successfully!');
+      } else {
+        // Unmark as applying
+        const updatedJob = await jobsApi.updateJob(job.id, {
+          isApplying: false,
+        });
+        setJobs(prevJobs =>
+          prevJobs.map(j => (j.id === job.id ? updatedJob : j)),
+        );
       }
-    },
-    [],
-  );
+    } catch (error) {
+      console.error('Failed to update job:', error);
+      Alert.alert('Error', 'Failed to apply to job. Please try again.');
+    }
+  }, []);
 
   const handleJobPress = useCallback((job: Job) => {
     Alert.alert(
       job.title,
       `Company: ${job.company}\n\n${job.description}\n\nSource: ${job.source}`,
-      [{text: 'Close'}],
+      [{ text: 'Close' }],
     );
   }, []);
 
@@ -101,7 +119,8 @@ export const JobsScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.syncButton}
           onPress={handleSyncJobs}
-          disabled={syncing}>
+          disabled={syncing}
+        >
           <Text style={styles.syncButtonText}>
             {syncing ? 'Syncing...' : 'Sync Jobs'}
           </Text>
@@ -133,7 +152,8 @@ export const JobsScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.syncButtonLarge}
             onPress={handleSyncJobs}
-            disabled={syncing}>
+            disabled={syncing}
+          >
             <Text style={styles.syncButtonLargeText}>
               {syncing ? 'Syncing...' : 'Sync Jobs from staff.am'}
             </Text>
@@ -143,7 +163,7 @@ export const JobsScreen: React.FC = () => {
         <FlatList
           data={jobs}
           keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <JobCard
               job={item}
               onPress={() => handleJobPress(item)}
@@ -190,7 +210,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     shadowColor: colors.shadowColor,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 8,
     elevation: 2,
@@ -205,7 +225,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     borderRadius: borderRadius.md,
     shadowColor: colors.primary,
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
@@ -225,7 +245,7 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.lg,
     borderRadius: borderRadius.lg,
     shadowColor: colors.shadowColor,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
@@ -268,7 +288,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     borderRadius: borderRadius.lg,
     shadowColor: colors.primary,
-    shadowOffset: {width: 0, height: 8},
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
     elevation: 8,

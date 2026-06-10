@@ -34,6 +34,16 @@ export const jobsApi = {
     const response = await api.post('/jobs/sync');
     return response.data;
   },
+
+  // Apply to a job
+  applyToJob: async (jobAnnouncementId: number, companyId: number, jobTitle: string): Promise<any> => {
+    const response = await api.post('/jobs/apply', {
+      job_announcement_id: jobAnnouncementId,
+      companyId: companyId,
+      job_announcement_title: jobTitle,
+    });
+    return response.data;
+  },
 };
 
 export default api;

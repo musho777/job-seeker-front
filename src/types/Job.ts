@@ -6,6 +6,8 @@ export interface Job {
   description: string;
   isApplying: boolean;
   sourceId: string;
+  companyId?: number;
+  jobAnnouncementId?: number;
   createdAt: string;
   updatedAt: string;
 }
