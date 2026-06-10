@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, ActivityIndicator} from 'react-native';
 import {Job} from '../types/Job';
 import {colors, spacing, borderRadius, typography} from '../theme/colors';
 
@@ -7,12 +7,14 @@ interface JobCardProps {
   job: Job;
   onPress: () => void;
   onToggleApplying: () => void;
+  isLoading?: boolean;
 }
 
 export const JobCard: React.FC<JobCardProps> = ({
   job,
   onPress,
   onToggleApplying,
+  isLoading = false,
 }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
@@ -42,15 +44,21 @@ export const JobCard: React.FC<JobCardProps> = ({
           style={[
             styles.applyButton,
             job.isApplying && styles.applyingButton,
+            isLoading && styles.loadingButton,
           ]}
-          onPress={onToggleApplying}>
-          <Text
-            style={[
-              styles.applyButtonText,
-              job.isApplying && styles.applyingButtonText,
-            ]}>
-            {job.isApplying ? '✓ Applying' : 'Mark as Applying'}
-          </Text>
+          onPress={onToggleApplying}
+          disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color={colors.white} />
+          ) : (
+            <Text
+              style={[
+                styles.applyButtonText,
+                job.isApplying && styles.applyingButtonText,
+              ]}>
+              {job.isApplying ? '✓ Applying' : 'Mark as Applying'}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -145,6 +153,9 @@ const styles = StyleSheet.create({
   applyingButton: {
     backgroundColor: colors.success,
     shadowColor: colors.success,
+  },
+  loadingButton: {
+    opacity: 0.7,
   },
   applyButtonText: {
     color: colors.white,

@@ -19,6 +19,7 @@ export const JobsScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [applyingJobId, setApplyingJobId] = useState<number | null>(null);
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -58,6 +59,8 @@ export const JobsScreen: React.FC = () => {
 
   const handleToggleApplying = useCallback(async (job: Job) => {
     try {
+      setApplyingJobId(job.id);
+
       if (!job.isApplying) {
         // Apply to the job
         console.log(job.sourceId);
@@ -88,6 +91,8 @@ export const JobsScreen: React.FC = () => {
     } catch (error) {
       console.error('Failed to update job:', error);
       Alert.alert('Error', 'Failed to apply to job. Please try again.');
+    } finally {
+      setApplyingJobId(null);
     }
   }, []);
 
@@ -168,6 +173,7 @@ export const JobsScreen: React.FC = () => {
               job={item}
               onPress={() => handleJobPress(item)}
               onToggleApplying={() => handleToggleApplying(item)}
+              isLoading={applyingJobId === item.id}
             />
           )}
           refreshControl={
